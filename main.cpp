@@ -22,21 +22,25 @@ static int bcdToD (unsigned int byte, unsigned int mask)
 void feedit(int pin){
     sbi(DDRB, pin);
     sbi(PORTB, pin);
-    _delay_ms(2250);
+    _delay_ms(1580);  // for 5v input
+    cbi(DDRB, pin);
     cbi(PORTB, pin);
 }
 
 int main(){
-    DDRB = 0xff;
     PORTB = 0x00;
+    DDRB = 0x00;
     int clock [8] ;
     ds1302setup   (4, 6, 7) ;
     ds1302clockRead (clock) ;
     int hour = bcdToD (clock [2], masks [2]);
+    hour += 8; // timezone
     int minute = bcdToD (clock [1], masks [1]);
     int sec = bcdToD (clock [0], masks [0]);
-    if(hour % 12 == 2 && minute == 0 && sec == 0) 
+    if(hour % 12 == 10 && minute == 0 && sec == 0) 
         feedit(0);
+    PORTB = 0x00;
+    DDRB = 0x00;
     sei();
     wdt_enable(WDTO_500MS);
     set_sleep_mode(7);
